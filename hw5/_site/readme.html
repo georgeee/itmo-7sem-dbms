@@ -1,0 +1,164 @@
+<h1 id="hw4-for-dbms-course-09-october-2015">HW4 for DBMS course, 09 October 2015.</h1>
+
+<p><em><strong>Made by George Agapov, group M3437</strong></em></p>
+
+<h2 id="relation-and-its-dependencies">Relation and it's dependencies</h2>
+
+<p>Student_Id, Student_Name, Group_Id, Group_Name, Course_Id, Course_Name, Lecturer_Id, Lecturer_Name, Mark</p>
+
+<h3 id="functional-dependencies">Functional dependencies</h3>
+
+<ol>
+  <li>Student_Id -&gt; Student_Name</li>
+  <li>Group_Id -&gt; Group_Name</li>
+  <li>Group_Name -&gt; Group_Id</li>
+  <li>Course_Id -&gt; Course_Name</li>
+  <li>Lecturer_Id -&gt; Lecturer_Name</li>
+  <li>Group_Id Course_Id -&gt; Lecturer_Id</li>
+  <li>Student_Id -&gt; Group_Id</li>
+  <li>Student_Id Course_Id -&gt; Mark</li>
+</ol>
+
+<h2 id="normal-forms">Normal Forms</h2>
+
+<p>For purpose of demonstrating (difference between 3-NF and BCNF) let's omit Group_id, Group_Name and start with initial relation:</p>
+
+<pre><code>Student_Id, Course_Id, Student_Name, Course_Name, Lecturer_Id, Lecturer_Name, Mark
+</code></pre>
+
+<h3 id="nf">1-NF</h3>
+
+<ul>
+  <li>no repeating groups</li>
+  <li>atomic attributes</li>
+  <li>there exist a key</li>
+</ul>
+
+<p><em>Student_Id</em>, <em>Course_Id</em>, Student_Name, Course_Name, Lecturer_Id, Lecturer_Name, Mark</p>
+
+<h3 id="nf-1">2-NF</h3>
+
+<ul>
+  <li>1-NF</li>
+  <li>Non-key attributes depend on whole key</li>
+</ul>
+
+<ol>
+  <li><em>Student_Id</em>, Student_Name</li>
+  <li><em>Course_Id</em>, Course_Name</li>
+  <li><em>Student_Id</em>, <em>Course_Id</em>, Lecturer_Id, Lecturer_Name</li>
+  <li><em>Student_Id</em>, <em>Course_Id</em>, Mark</li>
+</ol>
+
+<h3 id="nf-2">3-NF</h3>
+
+<ul>
+  <li>2-NF</li>
+  <li>Non-key attribute immidiately depend on keys (not through transitivity)</li>
+</ul>
+
+<ol>
+  <li><em>Student_Id</em>, Student_Name</li>
+  <li><em>Course_Id</em>, Course_Name</li>
+  <li><em>Student_Id</em>, <em>Course_Id</em>, Lecturer_Id</li>
+  <li><em>Lecturer_Id</em>, Lecturer_Name</li>
+  <li><em>Student_Id</em>, <em>Course_Id</em>, Mark</li>
+</ol>
+
+<h3 id="bcnf">BCNF</h3>
+
+<ul>
+  <li>For every non-trivial functional dependency <code>X-&gt;Y</code>: <code>X</code> is a super key</li>
+</ul>
+
+<ol>
+  <li><em>Student_Id</em>, Student_Name (#1)</li>
+  <li><em>Course_Id</em>, Course_Name (#4)</li>
+  <li><em>Student_Id</em>, Group_Id (#7)</li>
+  <li><em>Group_Id</em>, Group_Name (#2,3)</li>
+  <li><em>Group_Id</em>, <em>Course_Id</em>, Lecturer_Id (#6)</li>
+  <li><em>Lecturer_Id</em>, Lecturer_Name (#5)</li>
+  <li><em>Student_Id</em>, <em>Course_Id</em>, Mark (#8)</li>
+</ol>
+
+<h3 id="nf-3">4-NF</h3>
+
+<ul>
+  <li>3-NF</li>
+  <li>A record type should not contain two or more independent multi-valued facts about an entity</li>
+</ul>
+
+<p>(<em>Student_Id</em>, <em>Course_Id</em>), (<em>Group_Id</em>, <em>Course_Id</em>) - multi-valued facts, but only two</p>
+
+<p>So, 4-NF is same as BCNF</p>
+
+<h3 id="nf-4">5-NF</h3>
+
+<p>5-NF is same as BCNF</p>
+
+<h2 id="erm">ERM</h2>
+
+<p><img src="erm.png" alt="ERM" /></p>
+
+<h2 id="pdm">PDM</h2>
+
+<p><img src="pdm.png" alt="PDM" /></p>
+
+<h2 id="sql-for-tables-creation">SQL for tables' creation</h2>
+
+<pre><code>CREATE TABLE Student (
+  Id SERIAL NOT NULL PRIMARY KEY,
+  Name VARCHAR (50) NOT NULL,
+  GroupId INT NOT NULL
+);
+CREATE TABLE Lecturer (
+  Id SERIAL NOT NULL PRIMARY KEY,
+  Name VARCHAR (50) NOT NULL
+);
+CREATE TABLE StudentGroup (
+  Id SERIAL NOT NULL PRIMARY KEY,
+  Name VARCHAR (50) NOT NULL UNIQUE
+);
+CREATE TABLE Course (
+  Id SERIAL NOT NULL PRIMARY KEY,
+  Name VARCHAR (50) NOT NULL
+);
+CREATE TABLE Teaching (
+  GroupId INT NOT NULL,
+  CourseId INT NOT NULL,
+  LecturerId INT NOT NULL,
+  PRIMARY KEY (GroupId, CourseId)
+);
+CREATE TABLE Mark (
+  StudentId INT NOT NULL,
+  CourseId INT NOT NULL,
+  Mark DECIMAL (4, 2) NOT NULL,
+  PRIMARY KEY (StudentId, CourseId)
+);
+  
+ALTER TABLE Student ADD CONSTRAINT FK_Student_GroupId FOREIGN KEY (GroupId) REFERENCES StudentGroup (Id);
+ALTER TABLE Teaching ADD CONSTRAINT FK_Teaching_LecturerId FOREIGN KEY (LecturerId) REFERENCES Lecturer (Id);
+ALTER TABLE Teaching ADD CONSTRAINT FK_Teaching_GroupId FOREIGN KEY (GroupId) REFERENCES StudentGroup (Id);
+ALTER TABLE Teaching ADD CONSTRAINT FK_Teaching_CourseId FOREIGN KEY (CourseId) REFERENCES Course (Id);
+ALTER TABLE Mark ADD CONSTRAINT FK_Mark_CourseId FOREIGN KEY (CourseId) REFERENCES Course (Id);
+ALTER TABLE Mark ADD CONSTRAINT FK_Mark_StudentId FOREIGN KEY (StudentId) REFERENCES Student (Id);
+ALTER TABLE Mark ADD CONSTRAINT CH_Mark_Mark CHECK (Mark &gt;= 0 AND Mark &lt;= 100);
+</code></pre>
+
+<h3 id="create-database">Create database</h3>
+
+<pre><code>echo "DROP DATABASE hw4; CREATE DATABASE hw4" | psql; psql -d hw4 &lt; schema.sql
+</code></pre>
+
+<h2 id="data-set">Data set</h2>
+
+<pre><code>INSERT INTO StudentGroup (Id, Name) VALUES (1, 'M3437'), (2, 'M3338');
+INSERT INTO Student (Id, Name, GroupId)
+VALUES (1, 'George Agapov', 1), (2, 'George Konoplich', 1),
+       (3, 'Mikhail Ivanov', 2), (4, 'Alina Ruslanova', 2);
+INSERT INTO Lecturer (Id, Name) VALUES (1, 'George Korneev'), (2, 'Andrew Stankevich'), (3, 'Ivan Sorokin');
+INSERT INTO Course (Id, Name) VALUES (1, 'Java: basic'), (2, 'Java: advanced'),
+       (3, 'Translation methods'), (4, 'C++'), (5, 'Discrete math: semester 3');
+INSERT INTO Teaching (GroupId, CourseId, LecturerId) VALUES (2, 1, 1), (1, 4, 3);
+INSERT INTO Mark (StudentId, CourseId, Mark) VALUES (1, 4, 90), (2, 4, 70), (3, 1, 85), (4, 1, 67);
+</code></pre>

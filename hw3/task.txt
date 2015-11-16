@@ -1,0 +1,31 @@
+-- Attribute list
+
+Student_Id, Student_Name, Group_Id, Group_name, Course_Id, Course_Name, Lecturer_Id, Lecturer_Name, Mark
+
+-- Functional dependencies (that seem logical for me)
+
+Student_Id -> Student_Name
+Group_Id -> Group_Name
+Group_Name -> Group_Id
+Course_Id -> Course_Name
+Lecturer_Id -> Lecturer_Name
+
+Course_Id -> Lecturer_Id
+Student_Id -> Group_Id
+Student_Id Course_Id -> Mark
+
+-- Keys of relation
+
+-- Base key
+(Student_Id, Course_Id)
+
+-- Additional keys:
+All 2^7 combinations of [Student_Name, Group_Id, Group_name, Course_Name, Lecturer_Id, Lecturer_Name, Mark] joined with (Student_Id, Course_Id)
+E.g.:
+Student_id, Course_Id, Group_Id, Course_Name
+Student_id, Course_Id, Mark
+Student_id, Course_Id
+Student_Id, Student_Name, Group_Id, Group_name, Course_Id, Course_Name, Lecturer_Id, Lecturer_Name, Mark
+
+
+
