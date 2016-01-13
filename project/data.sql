@@ -1,16 +1,16 @@
-INSERT INTO City (Id, Code) VALUES
+INSERT INTO Country (Id, Code) VALUES
   (1, 'ru'), (2, 'uk'), (3, 'de');
 INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
-  ('City', 1, 'Name', 'ru', 'Россия'),
-  ('City', 1, 'Name', 'en', 'Russia'),
-  ('City', 1, 'Name', 'ge', 'Russland'),
-  ('City', 2, 'Name', 'ru', 'Великобритания'),
-  ('City', 2, 'Name', 'en', 'Great Britain'),
-  ('City', 2, 'Name', 'ge', 'Großbritannien'),
-  ('City', 3, 'Name', 'ru', 'Германия'),
-  ('City', 3, 'Name', 'en', 'Germany'),
-  ('City', 3, 'Name', 'ge', 'Deutschland');
-INSERT INTO City (Id, CityId) VALUES
+  ('Country', 1, 'Name', 'ru', 'Россия'),
+  ('Country', 1, 'Name', 'en', 'Russia'),
+  ('Country', 1, 'Name', 'ge', 'Russland'),
+  ('Country', 2, 'Name', 'ru', 'Великобритания'),
+  ('Country', 2, 'Name', 'en', 'Great Britain'),
+  ('Country', 2, 'Name', 'ge', 'Großbritannien'),
+  ('Country', 3, 'Name', 'ru', 'Германия'),
+  ('Country', 3, 'Name', 'en', 'Germany'),
+  ('Country', 3, 'Name', 'ge', 'Deutschland');
+INSERT INTO City (Id, CountryId) VALUES
   (1, 1), (2, 1), (3, 2), (4, 3);
 
 INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
@@ -62,7 +62,7 @@ INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Venue', 5, 'Address', 'en', 'Bismark street 35, 10627 Berlin, Germany'),
   ('Venue', 5, 'Address', 'ge', 'Bismarckstraße 35, 10627 Berlin, Germany');
 
-INSERT INTO Composer (Id, DateOfBith, DateOfDeath) VALUES
+INSERT INTO Composer (Id, DateOfBirth, DateOfDeath) VALUES
   	(1, '1839-03-21', '1881-03-28'),
   	(2, '1813-05-22', '1883-02-13'),
   	(3, '1840-05-07', '1893-11-06');
@@ -104,4 +104,33 @@ INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Performer', 1, 'Name', 'ge', 'Waleri Gergijev'),
   ('Performer', 2, 'Name', 'ru', 'Оркестр Мариинского театра'),
   ('Performer', 2, 'Name', 'en', 'Orchestra of Mariinsky theatre'),
-  ('Performer', 2, 'Name', 'ge', 'Das Orchester des Mariinski-Theater');
+  ('Performer', 2, 'Name', 'ge', 'Das Orchester des Mariinski-Theater'),
+  ('Performer', 3, 'Name', 'ru', 'Ольга Бородина'),
+  ('Performer', 3, 'Name', 'en', 'Olga Borodina'),
+  ('Performer', 3, 'Name', 'ge', 'Olga Borodina'),
+  ('Performer', 4, 'Name', 'ru', 'Синайский, Василий Серафимович'),
+  ('Performer', 4, 'Name', 'en', 'Vassily Sinaysky'),
+  ('Performer', 4, 'Name', 'ge', 'Wassili Sinaiski'),
+  ('Performer', 5, 'Name', 'ru', 'Заслуженный оркестр Санкт-Петербургской Филармонии'),
+  ('Performer', 5, 'Name', 'en', 'Honored Orchestra of Saint-Petersburg Philharmonia'),
+  ('Performer', 5, 'Name', 'ge', 'Geehrt Orchester des Sankt Petersburger Philharmonie');
+
+INSERT INTO Event (Id, Time, VenueId, PieceId) VALUES
+  (1, '2016-01-27 19:00 MSK', 1, 3), -- Khovanshschina
+  (2, '2016-02-03 20:00 MSK', 2, 4); -- Romeo & Juliet
+
+INSERT INTO EventPerformer (Id, EventId, PerformerId, Instrument) VALUES
+  (1, 1, 1, 'Conductor'), (2, 1, 3, 'Voice'), (3, 2, 4, 'Conductor');
+
+INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
+  ('EventPerformer', 2, 'Role', 'ru', 'Марфа'),
+  ('EventPerformer', 2, 'Role', 'en', 'Marfa'),
+  ('EventPerformer', 2, 'Role', 'ge', 'Marfa');
+
+INSERT INTO PortalUser (Id, Login, Name) VALUES
+  (1, 'georgeee', 'George Agapov'),
+  (2, 'jagger', 'Mick Jagger'),
+  (3, 'johny', 'John Lennon');
+
+INSERT INTO Subscription (EntityType, EntityId, UserId) VALUES
+  ('Composer', 2, 1);

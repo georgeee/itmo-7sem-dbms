@@ -4,14 +4,15 @@ CREATE TABLE Composer (
   DateOfDeath DATE
 );
 
-CREATE TYPE I18nEntity AS ENUM ('Composer', 'Piece', 'Venue', 'City', 'Performer', 'Event', 'EventPerformer');
+CREATE TYPE I18nEntity AS ENUM ('Composer', 'Piece', 'Venue', 'City', 'Performer', 'Event', 'EventPerformer', 'Country');
 CREATE TYPE I18nKey AS ENUM ('Name', 'Address', 'Role');
 CREATE TYPE I18nLang AS ENUM ('en', 'ru', 'ge');
 CREATE TABLE I18n (
   EntityType I18nEntity NOT NULL,
   EntityId INT NOT NULL,
   Key I18nKey NOT NULL,
-  Lang I18nLang NOT NULL
+  Lang I18nLang NOT NULL,
+  Value VARCHAR(1024) NOT NULL
 );
 
 CREATE TYPE PieceType AS ENUM ('Opera', 'Ballet', 'Symphony');
@@ -19,7 +20,7 @@ CREATE TABLE Piece (
   Id SERIAL NOT NULL PRIMARY KEY,
   Type PieceType,
   ComposerId INT NOT NULL,
-  GeneralPieceId INT NOT NULL
+  GeneralPieceId INT
 );
 
 CREATE TABLE Venue (
@@ -43,15 +44,15 @@ CREATE TABLE Performer (
 
 CREATE TABLE Event (
   Id SERIAL NOT NULL PRIMARY KEY,
-  StartTime TIMESTAMP WITH TIME ZONE,
-  EndTime TIMESTAMP WITH TIME ZONE,
+  Time TIMESTAMP WITH TIME ZONE,
   VenueId INT NOT NULL,
   PieceId INT NOT NULL,
-  Canceled BOOLEAN NOT NULL
+  Canceled BOOLEAN NOT NULL DEFAULT False
 );
 
-CREATE TYPE EPInstrument AS ENUM ('Conductor', 'Piano', 'Flute', 'Violin', 'Cello');
+CREATE TYPE EPInstrument AS ENUM ('Conductor', 'Piano', 'Flute', 'Violin', 'Cello', 'Voice');
 CREATE TABLE EventPerformer (
+  Id SERIAL NOT NULL PRIMARY KEY,
   EventId INT NOT NULL,
   PerformerId INT NOT NULL,
   Instrument EPInstrument
@@ -103,8 +104,7 @@ ALTER TABLE PortalUser ADD CONSTRAINT UN_PortalUser_Login UNIQUE (Login);
 ALTER TABLE EventPerformer ADD CONSTRAINT UN_EventPerformer_EventId_PerformerId UNIQUE (EventId, PerformerId);
 ALTER TABLE NotificationEntity ADD CONSTRAINT UN_NotificationEntity UNIQUE (NotificationId, EntityType, EntityId);
 
-CREATE INDEX Event_StartTime ON Event (StartTime);
-CREATE INDEX Event_EndTime ON Event (EndTime);
+CREATE INDEX Event_Time ON Event (Time);
 
 ALTER TABLE Composer ADD CONSTRAINT Composer_Dates CHECK (DateOfBirth < DateOfDeath);
 ALTER TABLE I18n ADD CONSTRAINT I18n_Key_EntityType CHECK ((Key = 'Name' AND EntityType != 'EventPerformer') OR (Key = 'Address' AND EntityType = 'Venue') OR (Key = 'Role' AND EntityType = 'EventPerformer'));
