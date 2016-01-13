@@ -69,8 +69,8 @@ CREATE TABLE Notification (
   Id SERIAL NOT NULL PRIMARY KEY,
   Type NotificationType NOT NULL,
   UserId INT NOT NULL,
-  CreatedTime TIMESTAMP NOT NULL,
-  Read BOOLEAN NOT NULL
+  CreatedTime TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  Read BOOLEAN NOT NULL DEFAULT False
 );
 
 CREATE TYPE NotificationEntityType AS ENUM ('Event', 'Composer', 'Piece', 'Venue', 'Performer');
@@ -103,8 +103,88 @@ ALTER TABLE Country ADD CONSTRAINT UN_Country_Code UNIQUE (Code);
 ALTER TABLE PortalUser ADD CONSTRAINT UN_PortalUser_Login UNIQUE (Login);
 ALTER TABLE EventPerformer ADD CONSTRAINT UN_EventPerformer_EventId_PerformerId UNIQUE (EventId, PerformerId);
 ALTER TABLE NotificationEntity ADD CONSTRAINT UN_NotificationEntity UNIQUE (NotificationId, EntityType, EntityId);
+ALTER TABLE Subscription ADD CONSTRAINT UN_Subscription UNIQUE (EntityType, EntityId, UserId);
 
 CREATE INDEX Event_Time ON Event (Time);
 
 ALTER TABLE Composer ADD CONSTRAINT Composer_Dates CHECK (DateOfBirth < DateOfDeath);
 ALTER TABLE I18n ADD CONSTRAINT I18n_Key_EntityType CHECK ((Key = 'Name' AND EntityType != 'EventPerformer') OR (Key = 'Address' AND EntityType = 'Venue') OR (Key = 'Role' AND EntityType = 'EventPerformer'));
+
+CREATE OR REPLACE FUNCTION cancelEvent(int) RETURNS void AS $cancelEvent$
+DECLARE
+  u INT;
+  _canceled BOOLEAN;
+BEGIN
+  SELECT Canceled FROM Event INTO _canceled WHERE Id = $1;
+  IF _canceled THEN
+    RAISE EXCEPTION 'already canceled';
+  ELSE
+    FOR u IN SELECT UserId FROM Subscription
+             WHERE EntityType = 'Event' AND EntityId = $1
+    LOOP
+      INSERT INTO Notification (Type, UserId) VALUES ('CANCELED_EVENT', u);
+      INSERT INTO NotificationEntity (NotificationId, EntityType, EntityId)
+        VALUES (currval(pg_get_serial_sequence('Notification','Id')), 'Event', $1);
+    END LOOP;
+    UPDATE Event SET Canceled = True WHERE Id = $1;
+  END IF;
+END;
+$cancelEvent$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION event_insert_trigger() RETURNS trigger AS $event_insert_trigger$
+DECLARE
+  u INT;
+  n INT;
+BEGIN
+  CREATE TEMPORARY VIEW Matched AS
+  SELECT s.EntityType, s.EntityId, s.UserId FROM Subscription s JOIN (
+    SELECT 'Composer'::NotificationEntityType as t, c.Id FROM Composer c JOIN Piece p ON c.Id = p.ComposerId AND p.Id = NEW.PieceId
+    UNION
+    SELECT 'Piece', NEW.PieceId
+    UNION
+    SELECT 'Venue', NEW.VenueId
+  ) cp ON cp.t = s.EntityType AND s.EntityId = cp.id;
+  FOR u IN SELECT DISTINCT UserId FROM Matched
+  LOOP
+    INSERT INTO Notification (Type, UserId) VALUES ('NEW_EVENT', u);
+    SELECT currval(pg_get_serial_sequence('Notification','Id')) INTO n;
+    INSERT INTO NotificationEntity (NotificationId, EntityType, EntityId)
+      SELECT n, 'Event', NEW.EventId;
+    INSERT INTO NotificationEntity (NotificationId, EntityType, EntityId)
+      SELECT n, EntityType, EntityId FROM Matched;
+  END LOOP;
+END;
+$event_insert_trigger$ LANGUAGE plpgsql;
+
+CREATE TRIGGER event_insert_trigger AFTER INSERT ON Event
+FOR EACH ROW EXECUTE PROCEDURE event_insert_trigger();
+
+CREATE OR REPLACE FUNCTION event_performer_insert_trigger() RETURNS trigger AS $event_performer_insert_trigger$
+DECLARE
+  u INT;
+  n INT;
+BEGIN
+  CREATE TEMPORARY VIEW Matched AS
+  SELECT s.EntityType, s.EntityId, s.UserId FROM Subscription s JOIN (
+    SELECT 'Performer'::NotificationEntityType as t, NEW.PerformerId as Id
+  ) cp ON cp.t = s.EntityType AND s.EntityId = cp.id;
+  FOR u IN SELECT DISTINCT UserId FROM Matched
+  LOOP
+    SELECT nn.Id FROM Notification nn INTO n
+      JOIN NotificationType nt ON nt.NotificationId = nn.Id
+        AND nn.Type = 'NEW_EVENT' AND nt.EntityType = 'Event' AND nt.EntityId = NEW.EventId
+        AND nn.UserId = u;
+    IF n IS NULL THEN
+      INSERT INTO Notification (Type, UserId) VALUES ('NEW_EVENT', u);
+      SELECT currval(pg_get_serial_sequence('Notification','Id')) INTO n;
+      INSERT INTO NotificationEntity (NotificationId, EntityType, EntityId)
+        SELECT n, 'Event', NEW.EventId;
+    END IF;
+    INSERT INTO NotificationEntity (NotificationId, EntityType, EntityId)
+      SELECT n, EntityType, EntityId FROM Matched;
+  END LOOP;
+END;
+$event_performer_insert_trigger$ LANGUAGE plpgsql;
+
+CREATE TRIGGER event_performer_insert_trigger AFTER INSERT ON EventPerformer
+FOR EACH ROW EXECUTE PROCEDURE event_performer_insert_trigger();

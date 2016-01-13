@@ -133,4 +133,4 @@ INSERT INTO PortalUser (Id, Login, Name) VALUES
   (3, 'johny', 'John Lennon');
 
 INSERT INTO Subscription (EntityType, EntityId, UserId) VALUES
-  ('Composer', 2, 1);
+  ('Composer', 2, 1), ('Event', 2, 1);
