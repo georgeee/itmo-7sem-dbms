@@ -65,7 +65,8 @@ INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
 INSERT INTO Composer (Id, DateOfBirth, DateOfDeath) VALUES
   	(1, '1839-03-21', '1881-03-28'),
   	(2, '1813-05-22', '1883-02-13'),
-  	(3, '1840-05-07', '1893-11-06');
+  	(3, '1840-05-07', '1893-11-06'),
+  	(4, '1891-04-23', '1953-03-05');
 
 INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Composer', 1, 'Name', 'ru', 'Мусоргский, Модест Петрович'),
@@ -76,10 +77,14 @@ INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Composer', 2, 'Name', 'ge', 'Richard Wagner'),
   ('Composer', 3, 'Name', 'ru', 'Чайковский, Пётр Ильич'),
   ('Composer', 3, 'Name', 'en', 'Pyotr Ilyich Tchaikovsky'),
-  ('Composer', 3, 'Name', 'ge', 'Pjotr Iljitsch Tschaikowski');
+  ('Composer', 3, 'Name', 'ge', 'Pjotr Iljitsch Tschaikowski'),
+  ('Composer', 4, 'Name', 'ru', 'Прокофьев, Сергей Сергеевич'),
+  ('Composer', 4, 'Name', 'en', 'Sergei Prokofiev'),
+  ('Composer', 4, 'Name', 'ge', 'Sergei Prokofjew');
 
 INSERT INTO Piece (Id, Type, ComposerId, GeneralPieceId) VALUES
-	(1, 'Ballet', 3, NULL), (2, 'Opera', 2, NULL), (3, 'Opera', 1, NULL), (4, NULL, 3, NULL);
+	(1, 'Ballet', 3, NULL), (2, 'Opera', 2, NULL), (3, 'Opera', 1, NULL), (4, NULL, 3, NULL),
+  (5, 'Symphony', 4, NULL), (6, 'Ballet', 4, NULL), (7, NULL, 4, 6);
 
 INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Piece', 1, 'Name', 'ru', 'Спящая красавица'),
@@ -93,7 +98,16 @@ INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Piece', 3, 'Name', 'ge', 'Chowanschtschina'),
   ('Piece', 4, 'Name', 'ru', 'Ромео и Джульетта, увертюра-фантазия'),
   ('Piece', 4, 'Name', 'en', 'Romeo and Juliet, an overture-fantasy'),
-  ('Piece', 4, 'Name', 'ge', 'Romeo und Julia, eine Fantasie-Ouvertüre');
+  ('Piece', 4, 'Name', 'ge', 'Romeo und Julia, eine Fantasie-Ouvertüre'),
+  ('Piece', 5, 'Name', 'ru', 'Симфония № 2'),
+  ('Piece', 5, 'Name', 'en', 'Symphony No. 2 in D minor'),
+  ('Piece', 5, 'Name', 'ge', 'Sinfonie No. 2'),
+  ('Piece', 6, 'Name', 'ru', 'Ромео и Джульетта'),
+  ('Piece', 6, 'Name', 'en', 'Romeo and Juliet'),
+  ('Piece', 6, 'Name', 'ge', 'Romeo und Julia'),
+  ('Piece', 7, 'Name', 'ru', 'Отрывки из балета "Ромео и Джульетта"'),
+  ('Piece', 7, 'Name', 'en', 'Excerpts from ballet "Romeo and Juliet"'),
+  ('Piece', 7, 'Name', 'ge', 'Auszüge aus Ballett "Romeo und Julia"');
 
 INSERT INTO Performer (Id) VALUES
 	(1), (2), (3), (4), (5);
@@ -115,12 +129,14 @@ INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('Performer', 5, 'Name', 'en', 'Honored Orchestra of Saint-Petersburg Philharmonia'),
   ('Performer', 5, 'Name', 'ge', 'Geehrt Orchester des Sankt Petersburger Philharmonie');
 
-INSERT INTO Event (Id, Time, VenueId, PieceId) VALUES
-  (1, '2016-01-27 19:00 MSK', 1, 3), -- Khovanshschina
-  (2, '2016-02-03 20:00 MSK', 2, 4); -- Romeo & Juliet
+INSERT INTO Event (Id, Time, VenueId) VALUES
+  (1, '2016-01-27 19:00 MSK', 1);
+
+INSERT INTO EventPiece (EventId, PieceId) VALUES
+  (1, 3); -- Khovanshschina
 
 INSERT INTO EventPerformer (Id, EventId, PerformerId, Instrument) VALUES
-  (1, 1, 1, 'Conductor'), (2, 1, 3, 'Voice'), (3, 2, 4, 'Conductor');
+  (1, 1, 1, 'Conductor'), (2, 1, 3, 'Voice');
 
 INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('EventPerformer', 2, 'Role', 'ru', 'Марфа'),
@@ -133,4 +149,23 @@ INSERT INTO PortalUser (Id, Login, Name) VALUES
   (3, 'johny', 'John Lennon');
 
 INSERT INTO Subscription (EntityType, EntityId, UserId) VALUES
-  ('Composer', 2, 1), ('Event', 2, 1);
+  ('Composer', 2, 1), ('Event', 2, 1), ('Performer', 4, 1), ('Piece', 6, 1);
+
+INSERT INTO Event (Id, Time, VenueId) VALUES
+  (2, '2016-02-03 20:00 MSK', 2),
+  (3, '2016-02-27 19:00 MSK', 1);
+INSERT INTO EventPiece (EventId, PieceId) VALUES
+  (2, 4), -- Romeo & Juliet, fantasy-overture
+  (2, 5), -- Symphony no. 2 by Prokofiev
+  (2, 7), -- Excerpts from ballet Romeo and Juliet
+  (3, 2); -- Walküre
+
+INSERT INTO EventPerformer (Id, EventId, PerformerId, Instrument) VALUES
+ (3, 2, 4, 'Conductor'),
+ (4, 3, 1, 'Conductor'), (5, 3, 3, 'Voice');
+INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
+  ('EventPerformer', 5, 'Role', 'ru', 'Брунгильда'),
+  ('EventPerformer', 5, 'Role', 'en', 'Brünnhilde'),
+  ('EventPerformer', 5, 'Role', 'ge', 'Brünnhilde');
+
+SELECT cancelEvent (2) ;
