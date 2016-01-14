@@ -152,20 +152,33 @@ INSERT INTO Subscription (EntityType, EntityId, UserId) VALUES
   ('Composer', 2, 1), ('Event', 2, 1), ('Performer', 4, 1), ('Piece', 6, 1);
 
 INSERT INTO Event (Id, Time, VenueId) VALUES
-  (2, '2016-02-03 20:00 MSK', 2),
-  (3, '2016-02-27 19:00 MSK', 1);
+  (2, '2015-02-03 20:00 MSK', 2),
+  (3, '2016-02-27 19:00 MSK', 1),
+  (4, '2015-02-17 19:00 MSK', 1),
+  (5, '2015-07-15 19:00 UTC', 4);
 INSERT INTO EventPiece (EventId, PieceId) VALUES
   (2, 4), -- Romeo & Juliet, fantasy-overture
   (2, 5), -- Symphony no. 2 by Prokofiev
+  (5, 5), -- Symphony no. 2 by Prokofiev
   (2, 7), -- Excerpts from ballet Romeo and Juliet
-  (3, 2); -- Walküre
+  (3, 2), -- Walküre
+  (4, 2); -- Walküre
 
 INSERT INTO EventPerformer (Id, EventId, PerformerId, Instrument) VALUES
  (3, 2, 4, 'Conductor'),
- (4, 3, 1, 'Conductor'), (5, 3, 3, 'Voice');
+ (4, 3, 1, 'Conductor'), (5, 3, 3, 'Voice'),
+ (6, 4, 1, 'Conductor'),
+ (7, 5, 4, 'Conductor');
 INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
   ('EventPerformer', 5, 'Role', 'ru', 'Брунгильда'),
   ('EventPerformer', 5, 'Role', 'en', 'Brünnhilde'),
   ('EventPerformer', 5, 'Role', 'ge', 'Brünnhilde');
 
 SELECT cancelEvent (2) ;
+
+
+INSERT INTO Performer (Id) VALUES
+  (6), (7);
+
+INSERT INTO I18n (EntityType, EntityId, Key, Lang, Value) VALUES
+  ('Performer', 6, 'Name', 'en', 'Yury Temirkanov');
