@@ -62,8 +62,7 @@
       Id SERIAL NOT NULL PRIMARY KEY,
       EventId INT NOT NULL,
       PerformerId INT NOT NULL,
-      Instrument EPInstrument,
-      PRIMARY KEY (EventId, PerformerId)
+      Instrument EPInstrument
     );
     
     CREATE TABLE PortalUser (

@@ -14,6 +14,7 @@
 
     ALTER TABLE Country ADD CONSTRAINT UN_Country_Code UNIQUE (Code);
     ALTER TABLE PortalUser ADD CONSTRAINT UN_PortalUser_Login UNIQUE (Login);
+    ALTER TABLE EventPerformer ADD CONSTRAINT UN_EventPerformer_EventId_PerformerId UNIQUE (EventId, PerformerId);
     
     CREATE INDEX Ix_Event_Time ON Event (Time);
     CREATE INDEX Ix_I18n_Lang ON I18n (Lang);
